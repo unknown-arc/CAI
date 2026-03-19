@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "CAI UI",
+  "description": "Popup UI for CAI (Cheater AI) with analyzer, snip, and settings.",
+  "version": "1.0.0",
+  "permissions": [
+    "storage",
+    "activeTab"
+  ],
+  "action": {
+    "default_title": "CAI",
+    "default_popup": "index.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": [
+        "Features/selectionIndicator.js",
+        "Features/pageAnalyzer.js",
+        "Features/pageSnip.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
+}
