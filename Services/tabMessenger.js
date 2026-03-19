@@ -19,7 +19,12 @@ function sendMessageToTab(tabId, payload) {
   return new Promise((resolve, reject) => {
     chrome.tabs.sendMessage(tabId, payload, (response) => {
       if (chrome.runtime.lastError) {
-        reject(new Error(chrome.runtime.lastError.message));
+        const rawMessage = chrome.runtime.lastError.message || "Unknown tab messaging error.";
+        if (/receiving end does not exist|could not establish connection/i.test(rawMessage)) {
+          reject(new Error("This page is not supported. Open a normal website tab and try again."));
+          return;
+        }
+        reject(new Error(rawMessage));
         return;
       }
       resolve(response);

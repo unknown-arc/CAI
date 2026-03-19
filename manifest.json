@@ -5,7 +5,16 @@
   "version": "1.0.0",
   "permissions": [
     "storage",
-    "activeTab"
+    "activeTab",
+    "downloads",
+    "tabs"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "host_permissions": [
+    "<all_urls>"
   ],
   "action": {
     "default_title": "CAI",

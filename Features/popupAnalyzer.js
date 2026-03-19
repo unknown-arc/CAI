@@ -17,14 +17,14 @@ export function initializeAnalyzer({ statusEl, outputEl }) {
     try {
       const response = await sendToActiveTab({ type: "CAI_ANALYZE_PAGE" });
       if (!response || !response.ok || !response.text) {
-        statusEl.textContent = "No question/options found on this page.";
+        statusEl.textContent = "No question/options detected. Try another question page.";
         outputEl.textContent = "No useful question block detected.";
         return;
       }
 
       outputEl.textContent = response.text;
       await copyText(response.text);
-      statusEl.textContent = "Question + options copied to clipboard.";
+      statusEl.textContent = "Question + options extracted and copied.";
     } catch (error) {
       statusEl.textContent = `Analyzer failed: ${error.message}`;
     } finally {

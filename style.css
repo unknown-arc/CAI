@@ -29,11 +29,18 @@ body {
 	margin: 0;
 	padding: 0;
 	width: 360px;
-	min-height: 380px;
+	min-height: 420px;
 	font-family: "Segoe UI", "Arial Nova", "Trebuchet MS", sans-serif;
 	color: var(--text);
 	background: var(--bg-gradient);
-	overflow-y: auto;
+	overflow: hidden;
+}
+
+body::-webkit-scrollbar,
+pre::-webkit-scrollbar,
+p::-webkit-scrollbar {
+	width: 0;
+	height: 0;
 }
 
 body {
@@ -67,8 +74,8 @@ body {
 	z-index: 2;
 	display: flex;
 	flex-direction: column;
-	gap: 12px;
-	padding: 16px;
+	gap: 10px;
+	padding: 14px;
 }
 
 .glass-panel {
@@ -76,7 +83,7 @@ body {
 	background: var(--panel);
 	backdrop-filter: blur(12px);
 	border-radius: 16px;
-	padding: 14px;
+	padding: 12px;
 	box-shadow: 0 10px 30px rgba(2, 8, 23, 0.45);
 }
 
@@ -96,7 +103,7 @@ body {
 }
 
 .subtext {
-	margin: 6px 0 12px;
+	margin: 6px 0 10px;
 	color: var(--muted);
 	font-size: 13px;
 }
@@ -109,7 +116,7 @@ h1 {
 	width: 100%;
 	border: 1px solid rgba(96, 165, 250, 0.5);
 	border-radius: 14px;
-	padding: 14px;
+	padding: 12px;
 	cursor: pointer;
 	background: linear-gradient(145deg, rgba(30, 64, 175, 0.4), rgba(14, 116, 144, 0.35));
 	color: #eff6ff;
@@ -137,7 +144,7 @@ h1 {
 }
 
 .status-text {
-	margin-top: 10px;
+	margin-top: 8px;
 	min-height: 18px;
 	color: #bfdbfe;
 	font-size: 12px;
@@ -183,7 +190,7 @@ h1 {
 
 .result-panel {
 	flex: 1;
-	margin-top: 12px;
+	margin-top: 10px;
 	padding: 10px;
 	border-radius: 12px;
 	background: rgba(15, 23, 42, 0.28);
@@ -194,8 +201,9 @@ h1 {
 	font-size: 11px;
 	line-height: 1.45;
 	color: #d1e6ff;
-	max-height: 130px;
+	max-height: 112px;
 	overflow: auto;
+	scrollbar-width: none;
 	white-space: pre-wrap;
 	word-break: break-word;
 }
@@ -237,6 +245,11 @@ h1 {
 .tool-btn:disabled {
 	opacity: 0.65;
 	cursor: not-allowed;
+}
+
+#audioBtn {
+	opacity: 0.92;
+	border-style: dashed;
 }
 
 .switch {
