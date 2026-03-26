@@ -26,7 +26,8 @@
       "js": [
         "Features/selectionIndicator.js",
         "Features/pageAnalyzer.js",
-        "Features/pageSnip.js"
+        "Features/pageSnip.js",
+        "Features/pageAudio.js"
       ],
       "run_at": "document_idle"
     }

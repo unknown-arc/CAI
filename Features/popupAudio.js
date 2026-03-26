@@ -2,9 +2,15 @@ export function initializeAudioPlaceholder({ statusEl }) {
   const audioBtn = document.getElementById("audioBtn");
   if (!audioBtn || !statusEl) return;
 
-  audioBtn.setAttribute("title", "Voice feature is coming in next update.");
-
   audioBtn.addEventListener("click", () => {
-    statusEl.textContent = "Voice feature is upcoming. This button is a placeholder for now.";
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      chrome.tabs.sendMessage(tabs[0].id, { action: "toggleAudioCaptions" }, (response) => {
+        if (chrome.runtime.lastError) {
+          statusEl.textContent = "Error: Please refresh the page before turning on audio captions.";
+        } else {
+          statusEl.textContent = response ? `Audio: ${response.status}` : "Audio toggled";
+        }
+      });
+    });
   });
 }
