@@ -1,7 +1,7 @@
 {
-  "manifest_version": 3,
-  "name": "CAI UI",
-  "description": "Popup UI for CAI (Cheater AI) with analyzer, snip, and settings.",
+  "manifest_version": 1,
+  "name": "CAI",
+  "description": "CAI with analyzer, snip, and settings.",
   "version": "1.0.0",
   "permissions": [
     "storage",
@@ -14,6 +14,7 @@
     "type": "module"
   },
   "host_permissions": [
+    "http://localhost:5000/*",
     "<all_urls>"
   ],
   "action": {
