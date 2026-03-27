@@ -28,7 +28,7 @@ def get_ai_response(user_message):
             },
             {
                 "role": "user",
-                "content": {user_message},
+                "content": user_message,
             }
         ],
         temperature=1,
