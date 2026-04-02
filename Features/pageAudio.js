@@ -2,9 +2,13 @@
 let audioOverlay = null;
 let captionsContainer = null;
 let isActive = false;
-let recognition = null;
-let recognizing = false;
-let currentInterimSpan = null;
+let micRecognition = null;
+let systemRecognition = null;
+let micRecognizing = false;
+let systemRecognizing = false;
+let currentMicInterimSpan = null;
+let currentSystemInterimSpan = null;
+let systemAudioStream = null;
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "toggleAudioCaptions") {
@@ -67,29 +71,45 @@ function removeOverlay() {
     audioOverlay.remove();
     audioOverlay = null;
     captionsContainer = null;
-    currentInterimSpan = null;
+    currentMicInterimSpan = null;
+    currentSystemInterimSpan = null;
   }
 }
 
-function appendCaption(text, isInterim = false, color = "#4ade80") {
+function appendCaption(text, { isInterim = false, color = "#4ade80", source = "mic" } = {}) {
   if (!captionsContainer) return;
 
-  if (isInterim) {
-    if (!currentInterimSpan) {
-      currentInterimSpan = document.createElement("div");
-      currentInterimSpan.style.color = "#a3a3a3";
-      currentInterimSpan.style.fontStyle = "italic";
-      captionsContainer.appendChild(currentInterimSpan);
+  const prefix = source === "system" ? "[SYSTEM] " : "[MIC] ";
+  const fullText = `${prefix}${text}`;
+
+  const getInterimRef = () => (source === "system" ? currentSystemInterimSpan : currentMicInterimSpan);
+  const setInterimRef = (value) => {
+    if (source === "system") {
+      currentSystemInterimSpan = value;
+    } else {
+      currentMicInterimSpan = value;
     }
-    currentInterimSpan.textContent = text;
+  };
+
+  if (isInterim) {
+    let interimSpan = getInterimRef();
+    if (!interimSpan) {
+      interimSpan = document.createElement("div");
+      interimSpan.style.color = "#a3a3a3";
+      interimSpan.style.fontStyle = "italic";
+      captionsContainer.appendChild(interimSpan);
+      setInterimRef(interimSpan);
+    }
+    interimSpan.textContent = fullText;
   } else {
-    if (currentInterimSpan) {
-      currentInterimSpan.remove();
-      currentInterimSpan = null;
+    const interimSpan = getInterimRef();
+    if (interimSpan) {
+      interimSpan.remove();
+      setInterimRef(null);
     }
     const newFinalLine = document.createElement("div");
     newFinalLine.style.color = color;
-    newFinalLine.textContent = text;
+    newFinalLine.textContent = fullText;
     captionsContainer.appendChild(newFinalLine);
 
     if (captionsContainer.children.length > 10) {
@@ -97,75 +117,199 @@ function appendCaption(text, isInterim = false, color = "#4ade80") {
     }
   }
 
-  audioOverlay.scrollTop = audioOverlay.scrollHeight;
+  if (audioOverlay) {
+    audioOverlay.scrollTop = audioOverlay.scrollHeight;
+  }
 }
 
-function startRecognition() {
+function getSpeechRecognitionCtor() {
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SpeechRecognition) {
-    appendCaption("Speech Recognition API is not supported in this browser.", false, "#ef4444");
-    return;
+    appendCaption("Speech Recognition API is not supported in this browser.", { color: "#ef4444", source: "mic" });
+    return null;
   }
 
-  recognition = new SpeechRecognition();
+  return SpeechRecognition;
+}
+
+function configureRecognition(recognition, source) {
   recognition.continuous = true;
   recognition.interimResults = true;
-  recognition.lang = 'en-US';
+  recognition.lang = "en-US";
 
-  recognition.onstart = function() {
-    recognizing = true;
-    appendCaption("Mic active. Start speaking...", false, "#fbbf24");
-  };
-
-  recognition.onerror = function(event) {
-    console.error("Speech recognition error", event.error);
-    if(event.error === 'not-allowed') {
-      appendCaption("Microphone access denied. Please allow microphone permissions on this site.", false, "#ef4444");
+  recognition.onstart = function () {
+    if (source === "system") {
+      systemRecognizing = true;
+      appendCaption("System audio transcription started.", { color: "#38bdf8", source });
+    } else {
+      micRecognizing = true;
+      appendCaption("Mic active. Start speaking...", { color: "#fbbf24", source });
     }
   };
 
-  recognition.onend = function() {
-    recognizing = false;
+  recognition.onerror = function (event) {
+    console.error("Speech recognition error", source, event.error);
+    if (event.error === "not-allowed") {
+      appendCaption("Microphone access denied. Please allow microphone permissions on this site.", {
+        color: "#ef4444",
+        source
+      });
+      return;
+    }
+
+    if (source === "system") {
+      appendCaption(`System audio error: ${event.error}`, { color: "#ef4444", source });
+    }
+  };
+
+  recognition.onend = function () {
+    if (source === "system") {
+      systemRecognizing = false;
+    } else {
+      micRecognizing = false;
+    }
+
     if (isActive) {
       setTimeout(() => {
         try {
-          if (isActive && !recognizing) {
-             recognition.start();
+          if (source === "system") {
+            if (isActive && !systemRecognizing && systemRecognition) {
+              const track = systemAudioStream?.getAudioTracks?.()[0];
+              if (track) {
+                systemRecognition.start(track);
+              }
+            }
+          } else if (isActive && !micRecognizing && micRecognition) {
+            micRecognition.start();
           }
-        } catch(e) {}
+        } catch (e) {
+          // Ignore restart failures; next toggle can re-init.
+        }
       }, 500);
     }
   };
 
-  recognition.onresult = function(event) {
-    let interim_transcript = '';
-    
+  recognition.onresult = function (event) {
+    let interimTranscript = "";
+
     for (let i = event.resultIndex; i < event.results.length; ++i) {
       if (event.results[i].isFinal) {
-        let final_text = event.results[i][0].transcript.trim();
-        if (final_text) {
-           appendCaption(final_text, false, "#4ade80");
+        const finalText = event.results[i][0].transcript.trim();
+        if (finalText) {
+          appendCaption(finalText, { color: source === "system" ? "#38bdf8" : "#4ade80", source });
         }
       } else {
-        interim_transcript += event.results[i][0].transcript;
+        interimTranscript += event.results[i][0].transcript;
       }
     }
-    
-    if (interim_transcript) {
-      appendCaption(interim_transcript, true);
+
+    if (interimTranscript) {
+      appendCaption(interimTranscript, { isInterim: true, source });
     }
   };
+}
+
+function startMicRecognition() {
+  const SpeechRecognition = getSpeechRecognitionCtor();
+  if (!SpeechRecognition) return;
+
+  micRecognition = new SpeechRecognition();
+  configureRecognition(micRecognition, "mic");
 
   try {
-    recognition.start();
+    micRecognition.start();
   } catch (e) {
     console.error(e);
   }
 }
 
+async function startSystemAudioRecognition() {
+  const SpeechRecognition = getSpeechRecognitionCtor();
+  if (!SpeechRecognition) return;
+
+  if (!navigator.mediaDevices || typeof navigator.mediaDevices.getDisplayMedia !== "function") {
+    appendCaption("System audio capture not supported in this browser context.", {
+      color: "#ef4444",
+      source: "system"
+    });
+    return;
+  }
+
+  try {
+    appendCaption("Allow screen/tab share with audio to transcribe system sound.", {
+      color: "#fbbf24",
+      source: "system"
+    });
+
+    systemAudioStream = await navigator.mediaDevices.getDisplayMedia({
+      video: true,
+      audio: true
+    });
+
+    const audioTrack = systemAudioStream.getAudioTracks()[0];
+    if (!audioTrack) {
+      appendCaption("No system audio track found. Enable share audio in picker.", {
+        color: "#ef4444",
+        source: "system"
+      });
+      systemAudioStream.getTracks().forEach((track) => track.stop());
+      systemAudioStream = null;
+      return;
+    }
+
+    systemRecognition = new SpeechRecognition();
+    configureRecognition(systemRecognition, "system");
+
+    audioTrack.addEventListener("ended", () => {
+      if (isActive) {
+        appendCaption("System audio sharing stopped.", { color: "#ef4444", source: "system" });
+      }
+    });
+
+    // Experimental support in Chromium builds that accept an AudioTrack.
+    systemRecognition.start(audioTrack);
+  } catch (error) {
+    appendCaption("System audio transcription unavailable. Keep mic transcription active.", {
+      color: "#ef4444",
+      source: "system"
+    });
+  }
+}
+
+function startRecognition() {
+  startMicRecognition();
+  startSystemAudioRecognition();
+}
+
+function stopStream(stream) {
+  if (!stream) return;
+  stream.getTracks().forEach((track) => track.stop());
+}
+
+function stopSingleRecognition(recognition, isRecognizing) {
+  if (!recognition) return;
+  if (isRecognizing) {
+    recognition.stop();
+    return;
+  }
+
+  try {
+    recognition.abort();
+  } catch (_error) {
+    // noop
+  }
+}
+
 function stopRecognition() {
   isActive = false;
-  if (recognition && recognizing) {
-    recognition.stop();
-  }
+  stopSingleRecognition(micRecognition, micRecognizing);
+  stopSingleRecognition(systemRecognition, systemRecognizing);
+
+  micRecognition = null;
+  systemRecognition = null;
+  micRecognizing = false;
+  systemRecognizing = false;
+
+  stopStream(systemAudioStream);
+  systemAudioStream = null;
 }

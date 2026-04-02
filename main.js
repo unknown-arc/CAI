@@ -7,7 +7,6 @@ function wirePopup() {
   const screenMain = document.getElementById("screen-main");
   const screenSettings = document.getElementById("screen-settings");
   const statusText = document.getElementById("statusText");
-  const outputEl = document.getElementById("analyzerOutput");
   const settingsBtn = document.getElementById("settingsBtn");
 
   const showMain = () => {
@@ -31,7 +30,7 @@ function wirePopup() {
   });
 
   initializeSettings();
-  initializeAnalyzer({ statusEl: statusText, outputEl });
+  initializeAnalyzer({ statusEl: statusText });
   initializeSnip({ statusEl: statusText });
   initializeAudioPlaceholder({ statusEl: statusText });
 }

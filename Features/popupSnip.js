@@ -6,7 +6,7 @@ export function initializeSnip({ statusEl }) {
 
   snipBtn.addEventListener("click", async () => {
     snipBtn.classList.add("active");
-    statusEl.textContent = "Snip mode started. Drag area, then press tick to download.";
+    statusEl.textContent = "Snip mode started. Drag area and CAI Lens opens automatically.";
 
     try {
       const response = await sendToActiveTab({ type: "CAI_START_SNIP" });
@@ -15,7 +15,7 @@ export function initializeSnip({ statusEl }) {
         return;
       }
 
-      statusEl.textContent = "Selection active on page. Tick = download, cross = close.";
+      statusEl.textContent = "Selection active on page. Release mouse to open Lens panel.";
     } catch (error) {
       statusEl.textContent = `Snip failed: ${error.message}`;
     } finally {
