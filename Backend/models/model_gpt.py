@@ -10,21 +10,22 @@ client = OpenAI(
     api_key=token,
 )
 
-response = client.chat.completions.create(
-    messages=[
-        {
-            "role": "system",
-            "content": "",
-        },
-        {
-            "role": "user",
-            "content": "What is the capital of France?",
-        }
-    ],
-    temperature=1,
-    top_p=1,
-    model=model
-)
+def gpt(user_message):
+    response = client.chat.completions.create(
+        messages=[
+            {
+                "role": "system",
+                "content": "",
+            },
+            {
+                "role": "user",
+                "content": "What is the capital of France?",
+            }
+        ],
+        temperature=1,
+        top_p=1,
+        model=model
+    )
 
-print(response.choices[0].message.content)
+    return response.choices[0].message.content
 
