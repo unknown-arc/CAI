@@ -1,5 +1,5 @@
 {
-  "manifest_version": 1,
+  "manifest_version": 3,
   "name": "CAI",
   "description": "CAI with analyzer, snip, and settings.",
   "version": "1.0.0",
@@ -26,7 +26,7 @@
       "matches": ["<all_urls>"],
       "js": [
         "Features/selectionIndicator.js",
-        "Features/pageAnalyzer.js",
+        "Features/Analyzer/pageAnalyzer.js",
         "Features/pageSnip.js",
         "Features/pageAudio.js"
       ],

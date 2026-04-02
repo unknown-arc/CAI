@@ -1,5 +1,5 @@
-import { sendToActiveTab } from "../Services/tabMessenger.js";
-import { copyText } from "../Services/clipboard.js";
+import { sendToActiveTab } from "../../Services/tabMessenger.js";
+import { copyText } from "../../Services/clipboard.js";
 
 function setWorking(button, value) {
   button.disabled = value;

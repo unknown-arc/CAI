@@ -1,5 +1,5 @@
 import { initializeSettings } from "./Settings/popupSettings.js";
-import { initializeAnalyzer } from "./Features/popupAnalyzer.js";
+import { initializeAnalyzer } from "./Features/Analyzer/popupAnalyzer.js";
 import { initializeSnip } from "./Features/popupSnip.js";
 import { initializeAudioPlaceholder } from "./Features/popupAudio.js";
 
