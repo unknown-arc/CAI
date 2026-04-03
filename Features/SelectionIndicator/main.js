@@ -42,14 +42,7 @@
     if (!styleEl) {
       styleEl = document.createElement("style");
       styleEl.id = STYLE_ID;
-      styleEl.textContent = `
-        *::selection {
-          background: transparent !important;
-        }
-        *::-moz-selection {
-          background: transparent !important;
-        }
-      `;
+      styleEl.textContent = "*::selection{background:transparent!important;}*::-moz-selection{background:transparent!important;}";
       (document.head || document.documentElement).appendChild(styleEl);
     }
 

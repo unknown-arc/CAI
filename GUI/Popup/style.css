@@ -1,5 +1,4 @@
 :root {
-    /* Dark Theme (Default) */
     --bg-main: #060c1e;
     --bg-gradient: radial-gradient(circle at 10% 0%, #0f172a 0%, #060c1e 60%, #020617 100%);
     --panel-bg: rgba(15, 23, 42, 0.65);
@@ -16,7 +15,6 @@
 }
 
 :root[data-theme="light"] {
-    /* Light Theme */
     --bg-main: #f1f5f9;
     --bg-gradient: radial-gradient(circle at 10% 0%, #ffffff 0%, #e2e8f0 60%, #cbd5e1 100%);
     --panel-bg: rgba(255, 255, 255, 0.75);
@@ -40,7 +38,7 @@
 
 html, body {
     width: 360px;
-    height: 480px; 
+    height: 480px;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     color: var(--text-main);
     background: var(--bg-main);
@@ -49,10 +47,8 @@ html, body {
     transition: background 0.3s ease, color 0.3s ease;
 }
 
-/* Scrollbar hiding */
 ::-webkit-scrollbar { width: 0; height: 0; }
 
-/* Background Orbs */
 .bg-orb {
     position: absolute;
     width: 240px;
@@ -80,10 +76,9 @@ html, body {
 :root[data-theme="light"] .orb-1 { background: rgba(59, 130, 246, 0.25); }
 :root[data-theme="light"] .orb-2 { background: rgba(34, 211, 238, 0.15); }
 
-/* Layout Shell */
 .popup-shell {
     position: relative;
-	border-radius: 20px;
+    border-radius: 20px;
     z-index: 2;
     display: flex;
     flex-direction: column;
@@ -92,7 +87,6 @@ html, body {
     gap: 12px;
 }
 
-/* Glass Panels */
 .glass-panel {
     flex: 1;
     display: flex;
@@ -107,7 +101,6 @@ html, body {
     transition: all 0.3s ease;
 }
 
-/* Typography */
 .panel-header { margin-bottom: 16px; }
 
 .eyebrow {
@@ -136,7 +129,6 @@ h1 {
     font-weight: 500;
 }
 
-/* Analyzer Button */
 .analyzer-btn {
     display: flex;
     align-items: center;
@@ -160,10 +152,7 @@ h1 {
 }
 
 .analyzer-btn:active { transform: translateY(0); }
-
-.analyzer-btn .icon-large {
-    flex-shrink: 0;
-}
+.analyzer-btn .icon-large { flex-shrink: 0; }
 
 .analyzer-btn .label {
     display: block;
@@ -179,7 +168,6 @@ h1 {
     margin-top: 2px;
 }
 
-/* Result Panel */
 .result-panel {
     flex: 1;
     display: flex;
@@ -223,7 +211,6 @@ pre {
     word-break: break-word;
 }
 
-/* Settings Group */
 .settings-group {
     background: var(--card-bg);
     border: 1px solid var(--panel-border);
@@ -261,7 +248,6 @@ pre {
     line-height: 1.4;
 }
 
-/* Status Text */
 .status-text {
     display: flex;
     align-items: center;
@@ -273,7 +259,6 @@ pre {
     color: var(--text-muted);
 }
 
-/* Bottom Toolbar */
 .bottom-toolbar {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -320,7 +305,6 @@ pre {
     border: 1px dashed var(--panel-border);
 }
 
-/* Toggle Switch */
 .switch {
     position: relative;
     display: inline-flex;
@@ -357,5 +341,4 @@ pre {
 .switch input:checked + .switch-track::before { transform: translateX(20px); }
 .switch input:focus-visible + .switch-track { outline: 2px solid var(--accent-hover); outline-offset: 2px; }
 
-/* Utility */
 [hidden] { display: none !important; }

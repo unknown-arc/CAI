@@ -1,4 +1,4 @@
-import { sendToActiveTab } from "../Services/tabMessenger.js";
+import { sendToActiveTab } from "../../../Services/TabMessenger/main.js";
 
 export function initializeSnip({ statusEl }) {
   const snipBtn = document.getElementById("snipBtn");
