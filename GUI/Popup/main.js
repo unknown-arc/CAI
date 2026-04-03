@@ -1,13 +1,12 @@
-import { initializeSettings } from "./Settings/popupSettings.js";
-import { initializeAnalyzer } from "./Features/popupAnalyzer.js";
-import { initializeSnip } from "./Features/popupSnip.js";
-import { initializeAudioPlaceholder } from "./Features/popupAudio.js";
+import { initializeSettings } from "../../Settings/Popup/main.js";
+import { initializeAnalyzer } from "../../Features/Analyzer/popup/main.js";
+import { initializeSnip } from "../../Features/Snip/popup/main.js";
+import { initializeAudio } from "../../Features/Audio/popup/main.js";
 
 function wirePopup() {
   const screenMain = document.getElementById("screen-main");
   const screenSettings = document.getElementById("screen-settings");
   const statusText = document.getElementById("statusText");
-  const outputEl = document.getElementById("analyzerOutput");
   const settingsBtn = document.getElementById("settingsBtn");
 
   const showMain = () => {
@@ -31,9 +30,9 @@ function wirePopup() {
   });
 
   initializeSettings();
-  initializeAnalyzer({ statusEl: statusText, outputEl });
+  initializeAnalyzer({ statusEl: statusText });
   initializeSnip({ statusEl: statusText });
-  initializeAudioPlaceholder({ statusEl: statusText });
+  initializeAudio({ statusEl: statusText });
 }
 
 if (document.readyState === "loading") {

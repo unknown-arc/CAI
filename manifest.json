@@ -19,15 +19,26 @@
   ],
   "action": {
     "default_title": "CAI",
-    "default_popup": "index.html"
+    "default_popup": "GUI/Popup/index.html"
   },
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
       "js": [
-        "Features/selectionIndicator.js",
-        "Features/Analyzer/pageAnalyzer.js",
-        "Features/pageSnip.js"
+
+        "Features/SelectionIndicator/main.js",
+        "Features/Analyzer/files/extractor.js",
+        "Features/Analyzer/main.js",
+        "Features/Snip/page/files/state.js",
+        "Features/Snip/page/files/helpers.js",
+        "Features/Snip/page/files/capture.js",
+        "Features/Snip/page/files/context.js",
+        "Features/Snip/page/files/lensPanel.js",
+        "Features/Snip/page/main.js",
+        "Features/Audio/page/files/state.js",
+        "Features/Audio/page/files/overlay.js",
+        "Features/Audio/page/files/recognition.js",
+        "Features/Audio/page/main.js"
       ],
       "run_at": "document_idle"
     }

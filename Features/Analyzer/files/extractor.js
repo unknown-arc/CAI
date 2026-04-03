@@ -1,4 +1,8 @@
 (function () {
+  if (!window.__CAI_ANALYZER__) {
+    window.__CAI_ANALYZER__ = {};
+  }
+
   function isVisible(node) {
     if (!(node instanceof Element)) return false;
     const style = window.getComputedStyle(node);
@@ -50,7 +54,7 @@
     return options.slice(0, 6);
   }
 
-  function buildPayload() {
+  window.__CAI_ANALYZER__.buildPayload = function buildAnalyzerPayload() {
     const texts = collectTexts();
     const question = pickQuestion(texts);
     const options = pickOptions(texts);
@@ -71,17 +75,5 @@
       options,
       text: lines.join("\n")
     };
-  }
-
-  chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-    if (!message || message.type !== "CAI_ANALYZE_PAGE") return;
-
-    const payload = buildPayload();
-    if (!payload) {
-      sendResponse({ ok: false });
-      return;
-    }
-
-    sendResponse({ ok: true, ...payload });
-  });
+  };
 })();
