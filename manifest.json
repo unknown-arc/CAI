@@ -25,6 +25,7 @@
     {
       "matches": ["<all_urls>"],
       "js": [
+
         "Features/SelectionIndicator/main.js",
         "Features/Analyzer/files/extractor.js",
         "Features/Analyzer/main.js",
