@@ -51,6 +51,24 @@ function downloadDataUrl(dataUrl, filename) {
   });
 }
 
+function sendMessageToSenderTab(sender, payload) {
+  return new Promise((resolve, reject) => {
+    const tabId = sender?.tab?.id;
+    if (typeof tabId !== "number") {
+      reject(new Error("No sender tab available."));
+      return;
+    }
+
+    chrome.tabs.sendMessage(tabId, payload, (response) => {
+      if (chrome.runtime.lastError) {
+        reject(new Error(chrome.runtime.lastError.message));
+        return;
+      }
+      resolve(response);
+    });
+  });
+}
+
 async function handleDownloadSnip(message, sender) {
   const dataUrl = message?.dataUrl;
   if (!dataUrl || typeof dataUrl !== "string") {
@@ -89,6 +107,15 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       .then((result) => sendResponse(result))
       .catch((error) => {
         sendResponse({ ok: false, message: error.message || "Unable to download image." });
+      });
+    return true;
+  }
+
+  if (message.type === "CAI_FORWARD_TO_TAB") {
+    sendMessageToSenderTab(sender, message.payload)
+      .then((result) => sendResponse(result))
+      .catch((error) => {
+        sendResponse({ ok: false, message: error.message || "Unable to forward message." });
       });
     return true;
   }

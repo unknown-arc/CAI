@@ -1,11 +1,60 @@
 (function () {
   const audio = window.__CAI_AUDIO__;
 
+  async function requestAiResponse(prompt) {
+    if (!audio.state.isActive || !audio.state.aiEnabled || !prompt) {
+      return;
+    }
+
+    if (audio.state.aiRequestInFlight) {
+      return;
+    }
+
+    audio.state.aiRequestInFlight = true;
+    audio.appendAiResponse("Thinking...");
+
+    try {
+      const response = await fetch("http://localhost:5000/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: prompt })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+      audio.appendAiResponse(data?.response || "No AI response received.");
+    } catch (_error) {
+      audio.appendAiResponse("AI server unavailable. Start backend on http://localhost:5000.");
+    } finally {
+      audio.state.aiRequestInFlight = false;
+    }
+  }
+
+  function queueAiResponse(source, text) {
+    if (!audio.state.aiEnabled || !text) {
+      return;
+    }
+
+    const prefix = source === "system" ? "System" : "Mic";
+    const prompt = `${prefix} said: ${text}`;
+
+    if (audio.state.aiRequestTimer) {
+      clearTimeout(audio.state.aiRequestTimer);
+    }
+
+    audio.state.aiRequestTimer = setTimeout(() => {
+      requestAiResponse(prompt);
+    }, 700);
+  }
+
   function getSpeechRecognitionCtor() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
       audio.appendCaption("Speech Recognition API is not supported in this browser.", {
-        color: "#ef4444",
+        color: "#f87171",
         source: "mic"
       });
       return null;
@@ -25,7 +74,7 @@
         audio.appendCaption("System audio transcription started.", { color: "#38bdf8", source });
       } else {
         audio.state.micRecognizing = true;
-        audio.appendCaption("Mic active. Start speaking...", { color: "#fbbf24", source });
+        audio.appendCaption("Mic active. Start speaking...", { color: "#34d399", source });
       }
     };
 
@@ -33,14 +82,14 @@
       console.error("Speech recognition error", source, event.error);
       if (event.error === "not-allowed") {
         audio.appendCaption("Microphone access denied. Please allow microphone permissions on this site.", {
-          color: "#ef4444",
+          color: "#f87171",
           source
         });
         return;
       }
 
       if (source === "system") {
-        audio.appendCaption(`System audio error: ${event.error}`, { color: "#ef4444", source });
+        audio.appendCaption(`System audio error: ${event.error}`, { color: "#f87171", source });
       }
     };
 
@@ -55,7 +104,12 @@
         setTimeout(() => {
           try {
             if (source === "system") {
-              if (audio.state.isActive && !audio.state.systemRecognizing && audio.state.systemRecognition) {
+              if (
+                audio.state.isActive &&
+                audio.state.systemEnabled &&
+                !audio.state.systemRecognizing &&
+                audio.state.systemRecognition
+              ) {
                 const track = audio.state.systemAudioStream && audio.state.systemAudioStream.getAudioTracks
                   ? audio.state.systemAudioStream.getAudioTracks()[0]
                   : null;
@@ -63,11 +117,16 @@
                   audio.state.systemRecognition.start(track);
                 }
               }
-            } else if (audio.state.isActive && !audio.state.micRecognizing && audio.state.micRecognition) {
+            } else if (
+              audio.state.isActive &&
+              audio.state.micEnabled &&
+              !audio.state.micRecognizing &&
+              audio.state.micRecognition
+            ) {
               audio.state.micRecognition.start();
             }
           } catch (_e) {
-            // Ignore restart failures.
+            return;
           }
         }, 500);
       }
@@ -80,7 +139,8 @@
         if (event.results[i].isFinal) {
           const finalText = event.results[i][0].transcript.trim();
           if (finalText) {
-            audio.appendCaption(finalText, { color: source === "system" ? "#38bdf8" : "#4ade80", source });
+            audio.appendCaption(finalText, { color: source === "system" ? "#38bdf8" : "#34d399", source });
+            queueAiResponse(source, finalText);
           }
         } else {
           interimTranscript += event.results[i][0].transcript;
@@ -94,6 +154,8 @@
   }
 
   function startMicRecognition() {
+    if (!audio.state.micEnabled || audio.state.micRecognition) return;
+
     const SpeechRecognition = getSpeechRecognitionCtor();
     if (!SpeechRecognition) return;
 
@@ -108,12 +170,14 @@
   }
 
   async function startSystemAudioRecognition() {
+    if (!audio.state.systemEnabled || audio.state.systemRecognition) return;
+
     const SpeechRecognition = getSpeechRecognitionCtor();
     if (!SpeechRecognition) return;
 
     if (!navigator.mediaDevices || typeof navigator.mediaDevices.getDisplayMedia !== "function") {
       audio.appendCaption("System audio capture not supported in this browser context.", {
-        color: "#ef4444",
+        color: "#f87171",
         source: "system"
       });
       return;
@@ -133,7 +197,7 @@
       const audioTrack = audio.state.systemAudioStream.getAudioTracks()[0];
       if (!audioTrack) {
         audio.appendCaption("No system audio track found. Enable share audio in picker.", {
-          color: "#ef4444",
+          color: "#f87171",
           source: "system"
         });
         audio.state.systemAudioStream.getTracks().forEach((track) => track.stop());
@@ -146,18 +210,99 @@
 
       audioTrack.addEventListener("ended", () => {
         if (audio.state.isActive) {
-          audio.appendCaption("System audio sharing stopped.", { color: "#ef4444", source: "system" });
+          audio.appendCaption("System audio sharing stopped.", { color: "#f87171", source: "system" });
         }
       });
 
       audio.state.systemRecognition.start(audioTrack);
     } catch (_error) {
       audio.appendCaption("System audio transcription unavailable. Keep mic transcription active.", {
-        color: "#ef4444",
+        color: "#f87171",
         source: "system"
       });
     }
   }
+
+  function stopMicRecognition() {
+    stopSingleRecognition(audio.state.micRecognition, audio.state.micRecognizing);
+    audio.state.micRecognition = null;
+    audio.state.micRecognizing = false;
+  }
+
+  function stopSystemRecognition() {
+    stopSingleRecognition(audio.state.systemRecognition, audio.state.systemRecognizing);
+    audio.state.systemRecognition = null;
+    audio.state.systemRecognizing = false;
+    stopStream(audio.state.systemAudioStream);
+    audio.state.systemAudioStream = null;
+  }
+
+  function setMicEnabled(enabled) {
+    audio.state.micEnabled = Boolean(enabled);
+    if (!audio.state.isActive) {
+      audio.renderControlState();
+      return;
+    }
+
+    if (audio.state.micEnabled) {
+      startMicRecognition();
+      audio.appendCaption("Microphone listening enabled.", { color: "#34d399", source: "mic" });
+    } else {
+      stopMicRecognition();
+      audio.appendCaption("Microphone listening paused.", { color: "#f87171", source: "mic" });
+    }
+
+    audio.renderControlState();
+  }
+
+  function setSystemEnabled(enabled) {
+    audio.state.systemEnabled = Boolean(enabled);
+    if (!audio.state.isActive) {
+      audio.renderControlState();
+      return;
+    }
+
+    if (audio.state.systemEnabled) {
+      startSystemAudioRecognition();
+      audio.appendCaption("System listening enabled.", { color: "#38bdf8", source: "system" });
+    } else {
+      stopSystemRecognition();
+      audio.appendCaption("System listening paused.", { color: "#f87171", source: "system" });
+    }
+
+    audio.renderControlState();
+  }
+
+  function setAiEnabled(enabled) {
+    audio.state.aiEnabled = Boolean(enabled);
+    if (!audio.state.aiEnabled) {
+      if (audio.state.aiRequestTimer) {
+        clearTimeout(audio.state.aiRequestTimer);
+        audio.state.aiRequestTimer = null;
+      }
+      audio.appendAiResponse("AI response paused (AI is OFF).");
+    } else {
+      audio.appendAiResponse("AI is ON. Waiting for final transcript...");
+    }
+
+    audio.renderControlState();
+  }
+
+  audio.toggleSource = function toggleSource(source) {
+    if (source === "mic") {
+      setMicEnabled(!audio.state.micEnabled);
+      return;
+    }
+
+    if (source === "system") {
+      setSystemEnabled(!audio.state.systemEnabled);
+      return;
+    }
+
+    if (source === "ai") {
+      setAiEnabled(!audio.state.aiEnabled);
+    }
+  };
 
   function stopStream(stream) {
     if (!stream) return;
@@ -174,26 +319,33 @@
     try {
       recognition.abort();
     } catch (_error) {
-      // noop
+      return;
     }
   }
 
   audio.startRecognition = function startRecognition() {
-    startMicRecognition();
-    startSystemAudioRecognition();
+    if (audio.state.micEnabled) {
+      startMicRecognition();
+    }
+    if (audio.state.systemEnabled) {
+      startSystemAudioRecognition();
+    }
+    if (audio.state.aiEnabled) {
+      audio.appendAiResponse("AI is ON. Waiting for final transcript...");
+    }
+    audio.renderControlState();
   };
 
   audio.stopRecognition = function stopRecognition() {
     audio.state.isActive = false;
-    stopSingleRecognition(audio.state.micRecognition, audio.state.micRecognizing);
-    stopSingleRecognition(audio.state.systemRecognition, audio.state.systemRecognizing);
+    stopMicRecognition();
+    stopSystemRecognition();
 
-    audio.state.micRecognition = null;
-    audio.state.systemRecognition = null;
-    audio.state.micRecognizing = false;
-    audio.state.systemRecognizing = false;
+    if (audio.state.aiRequestTimer) {
+      clearTimeout(audio.state.aiRequestTimer);
+      audio.state.aiRequestTimer = null;
+    }
 
-    stopStream(audio.state.systemAudioStream);
-    audio.state.systemAudioStream = null;
+    audio.state.aiRequestInFlight = false;
   };
 })();

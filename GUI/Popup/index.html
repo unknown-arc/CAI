@@ -3,100 +3,124 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CAI - Analyzer</title>
+    <title>CAI Control</title>
     <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
-    <div class="bg-orb orb-1"></div>
-    <div class="bg-orb orb-2"></div>
-
-    <main class="popup-shell">
-        <section class="glass-panel main-section" id="screen-main">
-            <header class="panel-header">
-                <p class="eyebrow">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg>
-                    CAI Assistant
-                </p>
-                <h1>Cheater AI</h1>
-                <p class="subtext">Analyze current page questions seamlessly</p>
+    <main class="popup">
+        <section class="panel shadow-sm">
+            <header class="top-row">
+                <div class="brand-wrap">
+                    <svg class="brand-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    <p class="brand">CAI</p>
+                </div>
+                <label class="model-select-wrap" for="modelSelect">
+                    <select id="modelSelect" aria-label="Choose model">
+                        <option value="openai/gpt-4.1">GPT-4.1</option>
+                        <option value="deepseek/DeepSeek-R1">DeepSeek R1</option>
+                        <option value="x-ai/grok-2">Grok 2</option>
+                    </select>
+                    <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                </label>
             </header>
 
-            <button id="analyzerBtn" class="analyzer-btn" type="button">
-                <svg class="icon-large" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="m9 12 2 2 4-4"/></svg>
-                <div class="btn-text">
-                    <span class="label">Run Analyzer</span>
-                    <span class="description">Extract question & options from active page</span>
-                </div>
-            </button>
+            <section class="center-stage" id="screen-main" aria-live="polite">
+                <button class="feature-circle pulse-hover" id="featureBadge" type="button">
+                    <div class="icon-wrap">
+                        <svg id="featureIcon" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
+                    </div>
+                    <span class="circle-title" id="featureTitle">Analyzer</span>
+                    <span class="circle-subtitle" id="featureSubtitle">Tap to start</span>
+                </button>
+            </section>
 
-            <div id="statusText" class="status-text" aria-live="polite">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                System Ready
-            </div>
+            <section class="settings-panel" id="screen-settings" hidden>
+                <div class="settings-group">
+                    <div class="settings-row">
+                        <div class="settings-info">
+                            <div class="settings-label">Light Theme</div>
+                            <div class="settings-hint">Switch popup color mode</div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="themeToggle" />
+                            <span class="switch-track"></span>
+                        </label>
+                    </div>
+                    <div class="settings-divider"></div>
+                    <div class="settings-row">
+                        <div class="settings-info">
+                            <div class="settings-label">Selection Indicator</div>
+                            <div class="settings-hint">Show text highlight markers</div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="selectionToggle" checked />
+                            <span class="switch-track"></span>
+                        </label>
+                    </div>
+                    <div class="settings-divider"></div>
+                    <div class="settings-row">
+                        <div class="settings-info">
+                            <div class="settings-label">Toolbar Analyzer</div>
+                            <div class="settings-hint">Show analyzer button in floating toolbar</div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="toolbarAnalyzerToggle" checked />
+                            <span class="switch-track"></span>
+                        </label>
+                    </div>
+                    <div class="settings-divider"></div>
+                    <div class="settings-row">
+                        <div class="settings-info">
+                            <div class="settings-label">Toolbar Snip</div>
+                            <div class="settings-hint">Show snip button in floating toolbar</div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="toolbarSnipToggle" checked />
+                            <span class="switch-track"></span>
+                        </label>
+                    </div>
+                    <div class="settings-divider"></div>
+                    <div class="settings-row">
+                        <div class="settings-info">
+                            <div class="settings-label">Toolbar Voice</div>
+                            <div class="settings-hint">Show voice button in floating toolbar</div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="toolbarVoiceToggle" checked />
+                            <span class="switch-track"></span>
+                        </label>
+                    </div>
+                </div>
+            </section>
+
+            <nav class="feature-tabs" aria-label="Feature toolbar">
+                <button class="tab-btn active" type="button" id="analyzerBtn" data-feature="analyzer">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    <span>Analyzer</span>
+                </button>
+                <button class="tab-btn" type="button" id="snipBtn" data-feature="snip">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12H8l-4 4 4 4h12"/><path d="M16 8V4l-4 4-4-4v4"/></svg>
+                    <span>Snip</span>
+                </button>
+                <button class="tab-btn" type="button" id="audioBtn" data-feature="voice">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
+                    <span>Voice</span>
+                </button>
+                <button class="tab-btn" type="button" id="settingsBtn" data-feature="settings">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                    <span>Settings</span>
+                </button>
+            </nav>
         </section>
 
-        <section class="glass-panel settings-section" id="screen-settings" hidden>
-            <header class="panel-header">
-                <p class="eyebrow">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
-                    Preferences
-                </p>
-                <h1>Settings</h1>
-                <p class="subtext">Configure application behavior</p>
-            </header>
-
-            <div class="settings-group">
-                <div class="settings-row">
-                    <div class="settings-info">
-                        <div class="settings-label">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-                            Light Theme
-                        </div>
-                        <div class="settings-hint">Toggle between day and night aesthetics.</div>
-                    </div>
-                    <label class="switch">
-                        <input type="checkbox" id="themeToggle" />
-                        <span class="switch-track"></span>
-                    </label>
-                </div>
-
-                <div class="settings-divider"></div>
-
-                <div class="settings-row">
-                    <div class="settings-info">
-                        <div class="settings-label">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 3 10.5 21 13.5 13.5 21 10.5 3 3"/></svg>
-                            Selection Indicator
-                        </div>
-                        <div class="settings-hint">Show visual cues for selected text on webpages.</div>
-                    </div>
-                    <label class="switch">
-                        <input type="checkbox" id="selectionToggle" checked />
-                        <span class="switch-track"></span>
-                    </label>
-                </div>
-            </div>
-
-            <div id="settingsStatus" class="status-text">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                Preferences saved
-            </div>
+        <section class="activation-panel shadow-sm">
+            <p class="status-text" id="statusText" hidden></p>
+            <button class="activation-toggle" id="activationToggle" type="button" aria-pressed="false">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
+                Activate on page
+            </button>
         </section>
-
-        <nav class="bottom-toolbar" aria-label="Feature toolbar">
-            <button class="tool-btn" type="button" id="snipBtn" title="Take a Snip">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/></svg>
-                <span>Snip</span>
-            </button>
-            <button class="tool-btn" type="button" id="audioBtn" title="Toggle Voice Captions">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
-                <span>Voice</span>
-            </button>
-            <button class="tool-btn active" type="button" id="settingsBtn" title="Open Settings">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-                <span>Settings</span>
-            </button>
-        </nav>
+        <button class="feature-close-btn" id="voiceCloseBtn" type="button" hidden>Close Voice Popup</button>
     </main>
 
     <script type="module" src="./main.js"></script>

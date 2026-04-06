@@ -38,7 +38,8 @@
         "Features/Audio/page/files/state.js",
         "Features/Audio/page/files/overlay.js",
         "Features/Audio/page/files/recognition.js",
-        "Features/Audio/page/main.js"
+        "Features/Audio/page/main.js",
+        "Features/FloatingToolbar/main.js"
       ],
       "run_at": "document_idle"
     }
